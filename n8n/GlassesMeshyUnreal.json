@@ -1,0 +1,328 @@
+{
+  "name": "GlassesMeshyUnreal",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.body.meshy_link }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        240,
+        -32
+      ],
+      "id": "c33e93ef-869a-4dab-b137-c67920f53d53",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11GeKvYHNx687zFf1coNk2x3M9gM2xbJJScqo3laXSJg",
+          "mode": "list",
+          "cachedResultName": "MeshyDatabase",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11GeKvYHNx687zFf1coNk2x3M9gM2xbJJScqo3laXSJg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11GeKvYHNx687zFf1coNk2x3M9gM2xbJJScqo3laXSJg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Webhook Python').item.json.body.prompt }}",
+            "Url": "={{ $json.content.download_url }}",
+            "Importado": "No"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Url",
+              "displayName": "Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Importado",
+              "displayName": "Importado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        -32
+      ],
+      "id": "59e577d8-b03f-467d-a141-e45721c4be77",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qYAnbxA84BoIfF2K",
+          "name": "GoogleSheetsBrunirows"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "ganbare-brunirows",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Experiment_3_Glasses_Unreal",
+          "mode": "list",
+          "cachedResultName": "Experiment_3_Glasses_Unreal",
+          "cachedResultUrl": "https://github.com/ganbare-brunirows/Experiment_3_Glasses_Unreal"
+        },
+        "filePath": "={{ $('Webhook Python').item.json.body.prompt }}.glb",
+        "binaryData": true,
+        "commitMessage": "=New Mesh uploaded at {{ $now.toFormat('yyyy-MM-dd_HH-mm-ss') }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        -32
+      ],
+      "id": "a7e9724f-25ce-4bff-9ee9-ea72d4290bd4",
+      "name": "Create a file",
+      "webhookId": "c26072db-608d-4561-8d51-fd676906845b",
+      "credentials": {
+        "githubApi": {
+          "id": "pIun5a9T3r2HMnm7",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d2534667-1387-4ca3-9d0f-bb729cf7e7f4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "a13578b6-77c8-4ba2-95dd-c5ea11d11d79",
+      "name": "Webhook Python",
+      "webhookId": "d2534667-1387-4ca3-9d0f-bb729cf7e7f4"
+    },
+    {
+      "parameters": {
+        "path": "5f5aca15-dc5f-4e92-bfdd-8d5a65011059",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        192
+      ],
+      "id": "5bcfd003-0bbc-49ab-a897-e50f352af4db",
+      "name": "Webhook Unreal",
+      "webhookId": "5f5aca15-dc5f-4e92-bfdd-8d5a65011059"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11GeKvYHNx687zFf1coNk2x3M9gM2xbJJScqo3laXSJg",
+          "mode": "list",
+          "cachedResultName": "MeshyDatabase",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11GeKvYHNx687zFf1coNk2x3M9gM2xbJJScqo3laXSJg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11GeKvYHNx687zFf1coNk2x3M9gM2xbJJScqo3laXSJg/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Importado",
+              "lookupValue": "No"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        192
+      ],
+      "id": "72b4ac5f-ddce-4cdb-bffa-d470ee091dc3",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qYAnbxA84BoIfF2K",
+          "name": "GoogleSheetsBrunirows"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "=Url",
+              "renameField": true,
+              "outputFieldName": "Urls"
+            }
+          ]
+        },
+        "options": {
+          "mergeLists": false
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        528,
+        192
+      ],
+      "id": "ac64916a-8f56-4d67-9c36-846d7cfa75b8",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=\n {{ $json.Urls }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        864,
+        192
+      ],
+      "id": "324f4a6e-81c8-4852-8ffd-8317814bfc44",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Create a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a file": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Python": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Unreal": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "aa215a5b-1ebb-43ae-a6ea-079129d62d32",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4767369ad5ef14a24e539ed3ce24a552b8b00d7c11bb8ad19b091d3810e45101"
+  },
+  "id": "COq87XIYgYQpTGUExaSZK",
+  "tags": []
+}

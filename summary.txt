@@ -1,0 +1,85 @@
+From Smart Glasses to Unreal Engine: My Latest Computer Vision Experiment
+
+Continuing with my computer vision experiments, it was time to play around with the Meta Ray-Ban glasses. I have the audio-only model (no display), which got me wondering exactly what features I could tap into for building custom apps.
+
+After digging around a bit, I found a [GitHub repository] that included a Kotlin sample project. I opened it up in Android Studio and built an app for my Samsung Galaxy. Through a Bluetooth connection, the app allows me to pull the camera feed from the glasses and take photos or videos that save directly to my phone's gallery. It was a great starting point, but I wanted to push it a lot further.
+
+Streaming the Meta Ray-Ban Feed
+
+Once I had the basic app running, my next goal was to add a streaming feature so I could visualize the live feed from the glasses directly on my computer. This required two things: updating the Android project to transmit the frames, and writing a Python script to receive them.
+
+First, on the Android side, I set up a mini web server running on port 8080 using the MJPEG protocol. When my computer connects to the phone's IP address, the server sends a specific header: Content-Type: multipart/x-mixed-replace. The phone then enters a loop, continuously transmitting JPEG frames through the server for as long as the stream is active.
+
+On the computer side, I wrote a Python script utilizing the OpenCV library (cv2). By pointing OpenCV to the URL hosted by my phone (<IP_ADDRESS>:8080), it connects to the web server, parses the MJPEG protocol, and extracts the individual JPEGs to display them in a live window.
+
+Here is the basic receiver code:
+
+import cv2
+
+# Use the IP address shown on your phone screen!
+stream_url = "<IP_ADDRESS>:8080" 
+
+cap = cv2.VideoCapture(stream_url)
+
+print("Connecting to Glasses Feed...")
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("Waiting for stream...")
+        continue
+
+    # Show the live view from the glasses
+    cv2.imshow("Meta Ray-Ban Live Feed", frame)
+
+    # Press 'q' to stop
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+
+YOLOv8 and SAM (Segment Anything Model)
+
+Now that my computer was receiving the feed, it was time to process that image using computer vision. For my first test, I simply applied YOLOv8 recognition and annotation using cv2, numpy, supervision, and the ultralytics libraries.
+
+My code detected any of the 80 default categories YOLOv8 recognizes, enclosing them in a bounding box with a label. The next step was to extract the object. Initially, I tried finding the centroid of the YOLO bounding box and feeding that single point into SAM (Segment Anything Model) to generate a segmentation mask.
+
+However, this method gave me pretty ugly results. Relying on a single pixel means that if the object has a drastic color change, SAM often only segments the part of the object sharing the color of that center pixel. To fix this, I changed the logic and passed the entire YOLO bounding box as the input prompt for the SAM model instead. That worked perfectly.
+
+At first, I triggered this process by pressing the 'P' key on my keyboard. But I wanted a more seamless experience, so I updated the Android app to send an event whenever the phone's volume changed. This allowed me to trigger the computer vision pipeline directly from my glasses just by swiping my finger across the touch sensor on the temple!
+
+Cropped Image to Meshy
+
+I’ve been using a paid subscription to Meshy for about a month, giving me access to their API—specifically their Image-to-3D service. I tweaked my Python script to take the clean, SAM-segmented image and send it to the Meshy API to generate a textured 3D model.
+
+Because YOLOv8 usually recognizes multiple objects in a single frame, I had to decide which object to send to Meshy. For this iteration, I based the decision entirely on the confidence score: the object with the highest confidence was the one chosen for 3D generation. Once Meshy finishes the job, the .glb file automatically downloads to my computer, ready to be imported into any 3D software.
+
+Custom Object Selection via Voice
+
+I loved how the pipeline was working, but I didn't like being forced to generate the object with the highest confidence. I wanted to choose exactly what I was looking at.
+
+Also, YOLOv8's 80-category limit was a bottleneck. To bypass this, I shifted to text-prompting SAM directly.
+
+I went back into the Android code and updated the gesture logic. Now, when I swipe the volume sensor on the glasses, it activates my phone's microphone for 3 seconds to listen to me name the object I want to segment. The app then sends the current video frame alongside my transcribed voice command as text.
+
+When the Python app receives this data, it checks if the requested object is in the frame. If it is, it segments it and returns a preview of the cropped image back to the phone app for me to approve. If I tap yes, it fires the image off to Meshy for 3D generation.
+
+Spawning Real-World Objects in Unreal Engine
+
+For the final piece of the puzzle, I envisioned a game mechanic similar to Animal Crossing, where you can decorate your digital space using objects you scan from your actual life.
+
+ I modified my Python script to fire a POST webhook to N8N, containing the Meshy download link. N8N catches the webhook, makes an HTTP request to download the .glb file, uploads it as raw data to a GitHub repository, and logs the raw download link into a Google Sheet.
+
+Finally, over in Unreal Engine, I created a custom event that triggers a GET request to read that Google Sheet. It iterates through the rows of GitHub links, and by using the gltf-runtime plugin, it downloads the models and spawns them dynamically as actors in my scene at runtime.
+
+What's Next?
+
+This experiment was a ton of fun and proved out a really exciting workflow for spatial computing. For my next round of experiments, I want to dive deeper into Homography and RANSAC algorithms, so I'll be posting updates on my social networks as I figure those out.
+
+If you are interested in this kind of combination of Smart Glasses and computer vision, don't forget to subscribe and follow my other links.
+
+See you soon,
+
+Bruno
